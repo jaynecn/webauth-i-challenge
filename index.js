@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 // imports
 const db = require('./data/dbConfig');
 const Users = require('./users/users-model');
-// const restricted = require('./restricted-middleware');
+const restricted = require('./restricted-middleware');
 
 //instantiate
 const app = express();
@@ -34,6 +34,16 @@ app.post('/api/register', (req, res) => {
     })
     .catch(error => {
       res.status(500).json({ message: 'user not created ' + error.message})
+    })
+})
+
+app.post('/api/login', restricted, (req, res) => {
+   Users.find()
+    .then(user => {
+      res.status(200).json({ message: `Welcome ${req.headers.username}!`});
+    })
+    .catch(error => {
+      res.json({ message: 'login error ' + error.message });
     })
 })
 
