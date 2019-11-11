@@ -15,6 +15,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
+
 // POST REQUESTS
 app.post('/api/register', (req, res) => {
   let user = req.body;
@@ -47,6 +49,18 @@ app.post('/api/login', restricted, (req, res) => {
     })
 })
 
+
+// GET REQUEST
+
+app.get('/api/users', restricted, (req, res) => {
+  Users.find()
+    .then(users => {
+      res.json(users);
+    })
+    .catch(error => {
+      res.json({ message: 'Cannot fetch users ' + error.message });
+    })
+})
 
 // catch-all endpoint
 app.get('*', handleDefault)
