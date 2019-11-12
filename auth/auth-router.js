@@ -3,10 +3,23 @@ const bcrypt = require('bcryptjs');
 
 const Users = require('../users/user-model.js');
 
-const restricted = require('./restricted-middleware');
 
-
-
+// LOGOUT
+router.get('/logout', (req, res) => {
+  if (req.session) {
+    // using req.session in here
+    // req.session.destroy
+    req.session.destroy(error => {
+      if(error) {
+        res.json('you cannot leave ' + error.message);
+      } else {
+        res.json('goodbye');
+      }
+    })
+  } else {
+    res.end();
+  }
+})
 
 // POST REQUESTS
 router.post('/register', (req, res) => {
@@ -30,11 +43,19 @@ router.post('/register', (req, res) => {
     })
 })
 
-router.post('/login', restricted, (req, res) => {
-   Users.find()
+router.post('/login', (req, res) => {
+  let { username, password } = req.body;
+
+   Users.findBy({ username })
+    .first()
     .then(user => {
-      res.status(200).json({ message: `Welcome ${req.headers.username}!`});
-    })
+      if(user && bcrypt.compareSync(password, user.password)) {
+        req.session.user = user;
+        res.status(200).json({ message: `Welcome ${req.body.username}!`});
+    } else {
+      res.status(401).json({ message: 'Invalid Credentials'});
+    }
+  })  
     .catch(error => {
       res.json({ message: 'login error ' + error.message });
     })
